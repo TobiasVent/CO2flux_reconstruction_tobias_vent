@@ -12,7 +12,9 @@ import os
 import os
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-
+START_YEAR = 2018
+END_YEAR = 2018
+# ----------------
 # -------------------------------------------------------------------------
 # Metric-Funktion
 # -------------------------------------------------------------------------
@@ -114,35 +116,32 @@ for path in data_paths:
     for row_idx, (model_name, (ModelClass, model_path, model_kwargs)) in enumerate(model_files.items()):
        # Load cache
 
-        if region_key == "North_Atlantic" and simulation_key == "experiment_1":
-            cache_file = f"/media/stu231428/1120 7818/prediction_caches/with_position/experiment_1/{region_key}/cache_{region_key}_{model_name}_with_position_experiment_1.pkl"
-            df_cache = pd.read_pickle(cache_file)
-    
-        if region_key == "Southern_Ocean" and simulation_key == "experiment_1":   
+        base = "/media/stu231428/1120 7818/Master_github/datasets/cache"
 
-            cache_file= f"//media/stu231428/1120 7818/prediction_caches/with_position/experiment_1/Southern_Ocean/cache_Southern_Ocean_2014_2018_{model_name}_with_position_experiment_1.pkl"
-            df_cache = pd.read_pickle(cache_file)
+        years = range(START_YEAR, END_YEAR + 1)
 
-        
-        if region_key == "global" and simulation_key == "experiment_1":
+        files = []
+        missing_years = []
 
-            cache_file_2=  f"/media/stu231428/1120 7818/Master_github/datasets/cache/lstm_global_reconstruction.pkl"
-            df_cache = pd.read_pickle(cache_file_2)
- 
-        
-        if region_key == "North_Atlantic" and simulation_key == "experiment_5":
-            cache_file = f"/media/stu231428/1120 7818/prediction_caches/with_position/experiment_5/North_Atlantic/cache_{model_name}_1958_2018_North_Atlantic_with_pos_exp_5.pkl"
-            df_cache = pd.read_pickle(cache_file)
-        
-        if region_key == "Southern_Ocean" and simulation_key == "experiment_5":
+        for year in years:
+            path = f"{base}/{model_name}_{region_key}_reconstruction_{year}_experiment_1.pkl"
+            if os.path.exists(path):
+                files.append(path)
+            else:
+                missing_years.append(year)
 
-            cache_file_3= f"/media/stu231428/1120 7818/prediction_caches/with_position/experiment_5/Southern_Ocean/cache_{model_name}_2004_2018_Southern_Ocean_with_pos_exp_5.pkl"
-            df_cache = pd.read_pickle(cache_file_3)
-        if region_key == "global" and simulation_key == "experiment_5":
-            cache_file = f"/media/stu231428/1120 7818/prediction_caches/with_position/experiment_5/Global/cache_{model_name}_2018_Global_with_pos_exp_5.pkl"
-            df_cache = pd.read_pickle(cache_file)
+        #  Fehler werfen, wenn Zeitraum nicht vollständig verfügbar
+        if missing_years:
+            raise FileNotFoundError(
+                f" Reconstruction files missing for years: {missing_years}\n"
+                f"Requested period: {START_YEAR}–{END_YEAR}\n"
+                f"Base path: {base}\n"
+                f"Model: {model_name}"
+            )
+        dfs = [pd.read_pickle(fp) for fp in files]
+        df_cache = pd.concat(dfs, ignore_index=True)
 
-            df_cache["time_counter"] = pd.to_datetime(df_cache["time_counter"])
+        df_cache["time_counter"] = pd.to_datetime(df_cache["time_counter"])
 
 
 
