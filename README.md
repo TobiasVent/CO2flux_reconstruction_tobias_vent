@@ -1,25 +1,58 @@
-# CO2flux_reconstruction_tobias_vent
+## Data Preparation and Model Training
 
-Note that the current implementation assumes **Experiment 1**. If a different
-experiment is used, the corresponding settings must be updated in the script.
+### Experiment Configuration
+Note that the current implementation assumes **Experiment 1**.  
+If a different experiment is used, the corresponding settings must be updated
+directly in the respective scripts.
 
-To compute the training and validation samples, execute the script  
-`data_preprocessing_training_validation_sets.py`.
+---
 
-Within the script, the fraction used for spatial subsampling as well as the
-temporal range defining the training and validation sets can be specified
-directly in the function calls.
-In addition, the file paths for the training and validation datasets must be
-specified in `config.data_paths.py`.
+### Training and Validation Data
 
-To generate test data, open `data_preprocessing_test_set.py` and specify the
-desired time span and region. The script produces one sample file for each
-selected year.
+To generate the training and validation samples, execute:
 
-Hyperparameter optimization is performed using `optuna_pipeline.py`. The optimal
-hyperparameters are then stored in the respective model configuration files.
-Model training is carried out by executing `train_lstm.py`,
-`train_mlp.py`, `train_xgboost.py`, and `train_attention_lstm.py`.
+- **`data_preprocessing_training_validation_sets.py`**
+
+Within this script:
+- The **fraction used for spatial subsampling** can be specified directly in the function calls.
+- The **temporal range** defining the training and validation periods can be configured.
+- The **file paths** for the training and validation datasets must be set in  
+  **`config.data_paths.py`**.
+
+---
+
+### Test Data Generation
+
+To generate the test datasets, open:
+
+- **`data_preprocessing_test_set.py`**
+
+In this script:
+- The **desired temporal range** and **region** must be specified.
+- The script generates **one test set per year that was chosen,**, which is later
+
+  used for reconstruction and evaluation.
+
+---
+
+### Hyperparameter Optimization and Model Training
+
+Hyperparameter optimization is performed using:
+
+- **`optuna_pipeline.py`**
+
+The resulting optimal hyperparameters are stored in the corresponding
+model configuration files.
+
+Model training is then carried out by executing:
+
+- **`train_lstm.py`**
+- **`train_attention_lstm.py`**
+- **`train_mlp.py`**
+- **`train_xgboost.py`**
+
+These scripts train the final models using the prepared training and validation datasets.
+
 
 ## CO₂ Flux Reconstruction from Test Data
 
