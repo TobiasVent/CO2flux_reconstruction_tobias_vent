@@ -53,3 +53,30 @@ Each yearly cache includes the following variables:
 
 The generated caches are used for further analysis, visualization, and comparison
 between simulated and reconstructed CO₂ fluxes.
+## Experiments Based on Reconstruction Caches
+
+After generating the reconstruction caches, the experimental analyses can be executed.
+All experiments operate exclusively on the cached reconstruction files.
+
+### Available Experiments
+
+- **`reconstruction_experiment.py`**  
+  Compares the reconstructed CO₂ flux with the simulated CO₂ flux on a spatial map.
+
+- **`plot_difference.py`**  
+  Visualizes the spatial difference between reconstructed and simulated CO₂ flux.
+
+- **`annual_seasonal.py`**  
+  Generates an annual mean plot and a seasonal mean plot of CO₂ flux.
+
+- **`scatter_plots.py`**  
+  Produces scatter plots comparing reconstructed versus simulated CO₂ flux values.
+
+- **`feature_importance_shap.py`**  
+  Creates feature importance visualizations for **MLP** and **XGBoost** models using SHAP values.
+
+- **`feature_importance_timeshap.py`**  
+  Generates feature importance plots for **LSTM** and **Attention LSTM** models using TimeSHAP.
+  - **`feature_importance_attention_scores.py`**  
+  Computes feature importance based on the attention scores produced by the **Attention LSTM** model.
+
