@@ -207,19 +207,18 @@ print("target_mean:", target_mean)
 print("target_std:", target_std)
 
 
-preprocess_yearwise(year=2018,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-preprocess_yearwise(year=2018,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='Southern_Ocean')
-preprocess_yearwise(year=2018,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic',experiment_name="experiment_2")
-preprocess_yearwise(year=2018,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='Southern_Ocean',experiment_name="experiment_2")  
-# preprocess_yearwise(year=2017,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2016,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2015,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2014,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2013,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')  
-# preprocess_yearwise(year=2012,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')                      
-# preprocess_yearwise(year=2011,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2010,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
-# preprocess_yearwise(year=2009,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std,region='North_Atlantic')
+YEARS = range(2018, 2008, -1)
+REGION = "North_Atlantic"
+
+for year in YEARS:
+    preprocess_yearwise(
+        year=year,
+        feature_means=feature_means,
+        feature_stds=feature_stds,
+        target_mean=target_mean,
+        target_std=target_std,
+        region=REGION
+    )
 
 # preprocess_yearwise(year=2018,feature_means=feature_means,feature_stds=feature_stds,target_mean=target_mean,target_std=target_std)
 # preprocess_yearwise(year=2017)
