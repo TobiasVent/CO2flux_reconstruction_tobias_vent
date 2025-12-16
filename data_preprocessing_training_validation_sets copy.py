@@ -7,8 +7,11 @@ from collections import namedtuple
 
 Sample = namedtuple("Sample", ["features", "target", "meta"])
 
-def preprocess_data(frac = 0.0001, out_dir = "/media/stu231428/1120 7818/Master_github/datasets",range_start=1958, range_end=1988):
 
+
+
+def preprocess_data(feature_mean = 0,feature_stds =0,target_mean = 0,target_std = 0,  frac = 0.0001, out_dir = "/media/stu231428/1120 7818/Master_github/datasets",range_start=1958, range_end=1988,training=True):
+    print("feature_mean", feature_mean, "feature_stds", feature_stds, "target_mean", target_mean, "target_std", target_std)
 
     time_series = pd.DataFrame()
 
@@ -50,11 +53,14 @@ def preprocess_data(frac = 0.0001, out_dir = "/media/stu231428/1120 7818/Master_
 
 
     print("Calculating normalization stats from data...")
-    feature_means = time_series[feature_columns].mean()
-    feature_stds = time_series[feature_columns].std()
+    if training:
+        feature_mean = time_series[feature_columns].mean()
+        feature_stds = time_series[feature_columns].std()
     print("Applying z-normalization using calculated statistics...")
-    time_series[feature_columns] = (time_series[feature_columns] - feature_means) / feature_stds
-
+    time_series[feature_columns] = (time_series[feature_columns] - feature_mean) / feature_stds
+    if training:
+        target_mean = time_series['co2flux_pre'].mean()
+        target_std = time_series['co2flux_pre'].std()
     # Normalize target
     target_mean = time_series['co2flux_pre'].mean()
     target_std = time_series['co2flux_pre'].std()
@@ -105,11 +111,16 @@ def preprocess_data(frac = 0.0001, out_dir = "/media/stu231428/1120 7818/Master_
         pickle.dump(all_samples, f)
     print("✅ Done! Saved file:", out_dir)
 
+    return feature_mean, feature_stds, target_mean, target_std
 
 
 
-preprocess_data(frac=0.0001, out_dir="/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",range_start=1958, range_end=1959)
-preprocess_data(frac=0.0001, out_dir="/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl", range_start=1989, range_end=1989)
+
+featre_mean, feature_stds, target_mean, target_std = preprocess_data(frac=0.0001, out_dir="/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",range_start=1958, range_end=1959,training=True)
+
+
+
+featre_mean, feature_stds, target_mean, target_std = preprocess_data(featre_mean, feature_stds, target_mean, target_std, frac=0.0001, out_dir="/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl", range_start=1989, range_end=1989,training=False)
 
 
 
