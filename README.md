@@ -9,7 +9,8 @@ To compute the training and validation samples, execute the script
 Within the script, the fraction used for spatial subsampling as well as the
 temporal range defining the training and validation sets can be specified
 directly in the function calls.
-
+In addition, the file paths for the training and validation datasets must be
+specified in `config.data_paths.py`.
 
 To generate test data, open `data_preprocessing_test_set.py` and specify the
 desired time span and region. The script produces one sample file for each
