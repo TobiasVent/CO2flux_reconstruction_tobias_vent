@@ -9,9 +9,10 @@ import shap
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
-
+from configs.mlp_config import HPARAMS_MLP, DATA_PATHS_MLP
 from collections import namedtuple
 from collections import namedtuple
+from configs.xgboost_config import DATA_PATHS_XGBoost
 
 
 Sample = namedtuple("Sample", ["features", "target", "meta"])
@@ -119,6 +120,7 @@ def run_shap_workflow_for_model_yearly(
     yearly_paths,                      # list of (pkl_path, region_name, experiment_name)
     feature_columns,
     dynamic_features,
+    out_dir,
     months_to_explain=(1, 7),           # (Jan, Jul)
     n_samples=1,
     
@@ -194,7 +196,7 @@ def run_shap_workflow_for_model_yearly(
 
             X_values_flat = X_month[sample_indices][:, :, :len(dynamic_features)]
             X_values_flat = X_values_flat.reshape(X_values_flat.shape[0], -1)
-            out_png = f"/media/stu231428/1120 7818/Master_github/datasets/plots/feature_importance/local_baseline_{model_name}_{month_name}_shap_{region_name}.png"
+            out_png = f"{out_dir}/local_baseline_{model_name}_{month_name}_shap_{region_name}.png"
             shap.summary_plot(
                 shap_values,
                 features=X_values_flat,
@@ -229,130 +231,14 @@ def run_shap_workflow_for_model_yearly(
 
 
 
+MLP = MLPModel(
+    input_dim=HPARAMS_MLP["input_dim"],
+    hidden_dims=HPARAMS_MLP["hidden_dims"],
+    dropout=HPARAMS_MLP["dropout"],
+).to(device)
+MLP.load_state_dict(torch.load(DATA_PATHS_MLP["model_out"]))
 
-# def run_shap_workflow_combined(models_list, data_paths, feature_columns, region_map):
-#     label_map = {
-#         "SST": "SST",
-#         "SAL": "SAL",
-#         "ice_frac": "Ice Fraction",
-#         "mixed_layer_depth": "Mixed Layer Depth",
-#         "heat_flux_down": "Heat Flux Down",
-#         "water_flux_up": "Water Flux Up",
-#         "stress_X": "Wind Stress X",
-#         "stress_Y": "Wind Stress Y",
-#         "currents_X": "Currents X",
-#         "currents_Y": "Currents Y",
-#         "co2flux_pre": r"$CO_{2}$ flux pre"
-#     }
-
-#     dynamic_features = [
-#         'SST', 'SAL', 'ice_frac', 'mixed_layer_depth', 'heat_flux_down',
-#         'water_flux_up', 'stress_X', 'stress_Y', 'currents_X', 'currents_Y'  ### <<< NEW >>>
-#     ]
-#     for path_data, path_avg, month_map, experiment_name in data_paths:
-#         # Load data
-#         with open(path_data, "rb") as f:
-#             data = pickle.load(f)
-#         with open(path_avg, "rb") as f:
-#             train_data = pickle.load(f)
-#         X_train = np.array([flatten_sample(s) for s in train_data])
-#         #X_train = np.array([s.features.flatten() for s in train_data])
-
-#         # Determine region
-#         region_key = [k for k in region_map if k in path_data][0]
-#         region_name = region_map[region_key]
-
-#         shap_values_dict = {}
-#         X_dict = {}
-
-#         for model_entry in models_list:
-#             model = model_entry["model"]
-#             model_name = model_entry["name"]
-
-
-
-#             shap_values_dict[model_name] = {}
-
-#             for i, month_name in month_map.items():
-#                 X_month = data["X"][i]
-#                 X_month_2d = flatten_sample_x_month(X_month)
-#                 if model_name == "MLP":
-#                     explainer = shap.KernelExplainer(model_predict, shap.sample(X_month_2d, 2000))
-#                     model.eval()
-#                 elif model_name == "XGBoost":
-#                     explainer = shap.TreeExplainer(model, shap.sample(X_month_2d, 2000))
-#                 #X_month_2d = X_month.reshape(X_month.shape[0], -1)
-#                 sample_indices = np.random.choice(X_month_2d.shape[0], 300, replace=False)
-
-#                 X_sampled = X_month_2d[sample_indices]
-#                 shap_values = explainer.shap_values(X_sampled)
-#                 dyn_idx = [feature_columns.index(f) for f in dynamic_features]
-#                 shap_values = shap_values[ :, :40]
-#                 shap_values_dict[model_name][month_name] = shap_values
-#                 if month_name not in X_dict:
-#                     X_dict[month_name] = X_sampled
-                
-
-#                 # dyn_names_flat = [
-#                 #     f"{feat}   (t)" if t == 0 else f"{feat} (t-{t})"
-#                 #     for t in range(4 - 1, -1, -1)
-#                 #     for feat in dynamic_features
-#                 # ]
-#                 dyn_names_flat = [
-#                     f"{label_map.get(feat, feat)} (t)" if t == 0 else f"{label_map.get(feat, feat)} (t-{t})"
-#                     for t in range(4 - 1, -1, -1)
-#                     for feat in dynamic_features
-#                 ]
-
-
-                
-#                 #dyn_names_flat = [f"{feat}_t-{t}" for t in range(4 - 1, -1, -1) for feat in dynamic_features]
-
-
-
-#                 X_values_flat = X_month[sample_indices][:, :, :len(dynamic_features)]
-#                 X_values_flat = X_values_flat.reshape(X_values_flat.shape[0], -1)
-#                 out_png = f"/data/stu231428/Master_Thesis/final_main/plots/feature_importance_feature_names/local_baseline_{model_name}_{month_name}_shap_{region_key}.png"
-#                 shap.summary_plot(
-#                     shap_values,
-#                     features=X_values_flat,
-#                     feature_names=dyn_names_flat,
-#                     max_display=15,
-#                     show=False
-                    
-#                 )
-#                 fig = plt.gcf()
-#                 ax = plt.gca()
-#                 # === DEBUG PRINT ===
-#                 print("\n[DEBUG] Axes in current SHAP figure:")
-#                 for idx, ax in enumerate(fig.axes):
-#                     print(f"  Axis {idx}: {ax} -> title='{ax.get_title()}' xlabel='{ax.get_xlabel()}' ylabel='{ax.get_ylabel()}'")
-                
-#                 cbar_ax = fig.axes[1]
-#                 cbar_ax.tick_params(labelsize=16)   # adjust font size
-#                 cbar_ax.set_ylabel("Feature value", fontsize=16)
-#                 fig.axes[0].tick_params(axis='both', labelsize=16) 
-#                 fig.axes[0].set_xlabel("Shapley value", fontsize=16)
-#                 #ax.tick_params(axis='both', labelsize=16)
-#                 fig.suptitle(
-#                 f"{region_name} {month_name} 2018 ({model_name})",
-#                 fontsize=18
-#                 )
-#                 fig.tight_layout(rect=[0, 0, 1, 0.95])  # <-- Platz für Titel schaffen
-#                 fig.savefig(out_png, dpi=150, bbox_inches="tight")
-#                 plt.close(fig)
-
-        # # Save combined beeswarm plot
-        # out_png = f"/data/stu231428/Master_Thesis/final_main/plots/feature_importance/_shap_{region_key}.png"
-        # plot_combined_shap_beeswarm(shap_values_dict, X_dict, feature_columns, region_name, out_png)
-
-# -------------------------------------------------------------------------
-# Load models
-# -------------------------------------------------------------------------
-MLP = MLPModel(hidden_dims=[207, 248, 198], input_dim=44, dropout=0).to(device)
-MLP.load_state_dict(torch.load('/data/stu231428/Master_Thesis/main/trained_models/mlp_with_pos.pt'))
-
-XGBoost = pickle.load(open("/data/stu231428/Master_Thesis/main/trained_models/xg_boost_with_pos_model.pkl", "rb"))
+XGBoost = pickle.load(open(DATA_PATHS_XGBoost["model_out"], "rb"))
 
 models_list = [
     {"model": MLP, "name": "MLP"},
@@ -370,13 +256,11 @@ region_map = {
     "Southern_ocean": "Southern Ocean"
 }
 
-month_map_experiment_1 = {
-    105: "January",
-    111: "July"
-}
 
 
 
+
+#paths to the test set you want to explain
 
 yearly_paths = [
     ("/media/stu231428/1120 7818/Master_github/datasets/yearly/North_Atlantic_test_2018_experiment_1.pkl",
@@ -396,10 +280,13 @@ dynamic_features = [
     'water_flux_up', 'stress_X', 'stress_Y', 'currents_X', 'currents_Y'  ### <<< NEW >>>
 ]
 
+
+out_dir =""
 for m in models_list:
     run_shap_workflow_for_model_yearly(
         m["model"], m["name"],
         yearly_paths=yearly_paths,
+        out_dir= out_dir,
         feature_columns=feature_columns,
         dynamic_features=dynamic_features
     )

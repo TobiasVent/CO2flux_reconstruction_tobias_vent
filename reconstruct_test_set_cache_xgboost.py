@@ -4,80 +4,87 @@ import pandas as pd
 import numpy as np
 from collections import namedtuple
 import xgboost as xgb
-
+from configs.data_paths import Stats_Data_Path
+from configs.xgboost_config import DATA_PATHS_XGBoost
 Sample = namedtuple("Sample", ["features", "target", "meta"])
 
 # ==========================
 # SETTINGS
 # ==========================
-YEAR = 2018
+# Define the year range to reconstruct
+START_YEAR = 2012
+END_YEAR = 2018
 
-XGB_MODEL_PATH = "/data/stu231428/Master_Thesis/main/trained_models/xg_boost_with_pos_model.pkl"
+region = "global"
+experiment = "experiment_1"
+
+# Test set path pattern (per year)
+TEST_PATH_PATTERN = (
+    "/media/stu231428/1120 7818/Master_github/datasets/yearly/"
+    "{region}_test_{year}_{experiment}.pkl"
+)
+
+# Output cache directory and filename pattern (per year)
 CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
-
-# ✅ FIX: benutze {year} (klein) und format(year=YEAR)
-TEST_PATH_PATTERN = "/media/stu231428/1120 7818/Master_github/datasets/yearly/global_test_{year}_experiment_1.pkl"
-
-# Normalization stats (target) – du setzt mean/std direkt
-# NORM_STATS_PATH = "/data/stu231428/Master_Thesis/Data/normalization_stats.pkl"
+OUT_PATTERN = os.path.join(CACHE_DIR, "XGBoost_{region}_reconstruction_{year}_{experiment}.pkl")
 
 
 def flatten_dyn_plus_static(x_window, n_dyn=10):
-    x_dyn = x_window[:, :n_dyn].reshape(-1)   # 4*10 = 40
-    x_static = x_window[0, n_dyn:]            # 4
+    """
+    Flatten a sliding window into a single feature vector:
+    - dynamic features (first n_dyn columns) are flattened across time
+    - static features (remaining columns) are taken once (from the first timestep)
+    """
+    x_dyn = x_window[:, :n_dyn].reshape(-1)   # e.g. 4*10 = 40
+    x_static = x_window[0, n_dyn:]            # e.g. 4 static features
     return np.concatenate([x_dyn, x_static]).astype(np.float32)
 
 
-def main():
-    # ---------------------------
-    # 0) Output path (mit Jahr)
-    # ---------------------------
+def reconstruct_one_year(year, target_mean, target_std):
+    """
+    Reconstruct CO2 flux for one specific year:
+    - load year test samples
+    - build X matrix
+    - predict with XGBoost model
+    - denormalize
+    - save as a pickle dataframe
+    """
     os.makedirs(CACHE_DIR, exist_ok=True)
-    out_path = os.path.join(CACHE_DIR, f"XGBoost_global_reconstruction_{YEAR}_experiment_1.pkl")
+    out_path = OUT_PATTERN.format(year=year, region=region, experiment=experiment)
 
     # ---------------------------
-    # 1) Normalization stats
+    # Load year-specific test samples
     # ---------------------------
-    target_mean = 0.1847209
-    target_std = 1.3368018
-    print(f"✅ target_mean={target_mean:.6f}, target_std={target_std:.6f}")
-
-    # ---------------------------
-    # 2) Load year-specific test samples
-    # ---------------------------
-    test_path = TEST_PATH_PATTERN.format(year=YEAR)
-    print("🔎 Using test_path:", test_path)
+    test_path = TEST_PATH_PATTERN.format(year=year, region=region, experiment=experiment)
+    print("Using test_path:", test_path)
 
     if not os.path.exists(test_path):
-        raise FileNotFoundError(f"❌ Test set for YEAR={YEAR} not found: {test_path}")
+        raise FileNotFoundError(f" Test set for year={year} not found: {test_path}")
 
-    print(f"📦 Loading test samples for {YEAR}: {test_path}")
+    print(f"Loading test samples for {year}: {test_path}")
     with open(test_path, "rb") as f:
         samples = pickle.load(f)
 
-    print(f"✅ Loaded {len(samples):,} samples")
+    print(f"Loaded {len(samples):,} samples")
 
     # ---------------------------
-    # 3) Build feature matrix
+    # Build feature matrix
     # ---------------------------
-    print("🧱 Building feature matrix for XGBoost...")
-    X = np.stack([flatten_dyn_plus_static(s.features) for s in samples], axis=0)  # (N,44)
-    y = np.array([s.target for s in samples], dtype=np.float32)                  # (N,)
+    print(" Building feature matrix for XGBoost...")
+    X = np.stack([flatten_dyn_plus_static(s.features) for s in samples], axis=0)
+    y = np.array([s.target for s in samples], dtype=np.float32)
     metas = [s.meta for s in samples]
-    print(f"✅ X shape: {X.shape}, y shape: {y.shape}")
+    print(f" X shape: {X.shape}, y shape: {y.shape}")
 
     # ---------------------------
-    # 4) Load model + predict
+    # Load model + predict
     # ---------------------------
     print("🤖 Loading XGBoost model...")
-    # XGBoost hinzufügen
-   
-    with open(XGB_MODEL_PATH, "rb") as f:
+    with open(DATA_PATHS_XGBoost["model_out"], "rb") as f:
         model = pickle.load(f)
-   
-    print("✅ Model loaded")
+    print("Model loaded")
 
-    print("🚀 Predicting...")
+    print(" Predicting...")
     preds = model.predict(X).astype(np.float32)
 
     # Denormalize
@@ -85,9 +92,9 @@ def main():
     y_denorm = y * target_std + target_mean
 
     # ---------------------------
-    # 5) Build dataframe
+    # Build dataframe
     # ---------------------------
-    print("📄 Building DataFrame...")
+    print(" Building DataFrame...")
     rows = []
     n = len(samples)
 
@@ -111,10 +118,40 @@ def main():
     print(df.head())
 
     # ---------------------------
-    # 6) Save
+    # Save
     # ---------------------------
     df.to_pickle(out_path)
-    print(f"\n💾 Saved reconstruction cache for {YEAR} to:\n{out_path}")
+    print(f"\n Saved reconstruction cache for {year} to:\n{out_path}")
+
+
+def main():
+    """
+    Main entry point:
+    - validate year range
+    - load training normalization stats
+    - loop over years and reconstruct each year
+    """
+    if END_YEAR < START_YEAR:
+        raise ValueError(f"Invalid range: START_YEAR={START_YEAR} > END_YEAR={END_YEAR}")
+
+    os.makedirs(CACHE_DIR, exist_ok=True)
+
+    # ---------------------------
+    # Normalization stats (must match training!)
+    # ---------------------------
+    training_stats_dir = pickle.load(open(Stats_Data_Path["training_stats"], "rb"))
+    target_mean = training_stats_dir["target_mean"]
+    target_std = training_stats_dir["target_stds"]
+
+    # target_mean = 0.1847209
+    # target_std = 1.3368018
+    print(f" target_mean={target_mean:.6f}, target_std={target_std:.6f}")
+
+    # ---------------------------
+    # Run reconstruction year by year
+    # ---------------------------
+    for year in range(START_YEAR, END_YEAR + 1):
+        reconstruct_one_year(year, target_mean, target_std)
 
 
 if __name__ == "__main__":

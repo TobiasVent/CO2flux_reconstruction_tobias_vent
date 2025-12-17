@@ -12,7 +12,7 @@ import os
 import os
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-START_YEAR = 2018
+START_YEAR = 2009
 END_YEAR = 2018
 # ----------------
 # -------------------------------------------------------------------------
@@ -40,17 +40,16 @@ def flatten_sample_x_month(x_month, n_dyn=10, n_static=4):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
+#directory where youre caches are stored
+cache_dir = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+
+#directory where you want to save the plots
+out_dir = ""
+
 # -------------------------------------------------------------------------
 # Model definitions
 # -------------------------------------------------------------------------
-model_files = {
-    "Simulation": ("dummy","dummy","dummy"),
-    "LSTM": ("LSTMModel", "/data/stu231428/Master_Thesis/main/trained_models/lsmt_with_pos.pt", {"input_size": 14, "hidden_dim": 128, "dropout": 0, "num_layers": 3}),
-    
-    "Attention LSTM":("LSTMModelAttentionTemporal","/data/stu231428/Master_Thesis/main/trained_models/attention_temporal_lstm_with_pos.pt",{'input_size': 14,'hidden_dim': 256, 'dropout': 0.4}),
-    "MLP": ("MLPModel", "/data/stu231428/Master_Thesis/main/trained_models/mlp_with_pos.pt", {"hidden_dims": [207, 248, 198], "input_dim": 44, "dropout": 0}),
-    "xgboost": ("xgboost","xgb_model","dummy")
-}
+model_files = ["LSTM","Attention_LSTM","MLP","XGBoost"]
 
   # Platzhalter für Konsistenz
 
@@ -75,14 +74,14 @@ simulation_map = {
 # Data paths
 # -------------------------------------------------------------------------
 data_paths = [
-    #"North_Atlantic_experiment_1",
-    #"Southern_Ocean_experiment_1",
+    "North_Atlantic_experiment_1",
+    "Southern_Ocean_experiment_1",
     
     "global_experiment_1",
-    #"North_Atlantic_5",
-    #"Southern_Ocean_experiment_5",
+    "North_Atlantic_5",
+    "Southern_Ocean_experiment_5",
     
-    #"global_experiment_5"
+    "global_experiment_5"
 
 ]
 
@@ -113,10 +112,10 @@ for path in data_paths:
 
   
 
-    for row_idx, (model_name, (ModelClass, model_path, model_kwargs)) in enumerate(model_files.items()):
+    for row_idx, model_name in enumerate(model_files.items()):
        # Load cache
 
-        base = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+        cache_dir = "/media/stu231428/1120 7818/Master_github/datasets/cache"
 
         years = range(START_YEAR, END_YEAR + 1)
 
@@ -124,7 +123,7 @@ for path in data_paths:
         missing_years = []
 
         for year in years:
-            path = f"{base}/{model_name}_{region_key}_reconstruction_{year}_experiment_1.pkl"
+            path = f"{cache_dir}/{model_name}_{region_key}_reconstruction_{year}_experiment_1.pkl"
             if os.path.exists(path):
                 files.append(path)
             else:
@@ -135,7 +134,7 @@ for path in data_paths:
             raise FileNotFoundError(
                 f" Reconstruction files missing for years: {missing_years}\n"
                 f"Requested period: {START_YEAR}–{END_YEAR}\n"
-                f"Base path: {base}\n"
+                f"Base path: {cache_dir}\n"
                 f"Model: {model_name}"
             )
         dfs = [pd.read_pickle(fp) for fp in files]
@@ -163,6 +162,6 @@ for path in data_paths:
         })
 
     results_df = pd.DataFrame(all_results)
-    csv_path = os.path.join("/media/stu231428/1120 7818/Master_github/datasets/plots/metrics", f"model_metrics_monthly_and_total_{region_key}.csv")
+    csv_path = os.path.join(out_dir, f"model_metrics_monthly_and_total_{region_key}.csv")
     results_df.to_csv(csv_path, index=False)
     print(f"\n✅ Ergebnisse gespeichert unter: {csv_path}")

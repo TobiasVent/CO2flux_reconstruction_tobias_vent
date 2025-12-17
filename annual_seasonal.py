@@ -9,8 +9,14 @@ import os
 from sklearn.metrics import mean_squared_error
 from matplotlib.patches import Patch
 import calendar
-START_YEAR = 2018
-END_YEAR = 2018
+START_YEAR = 2012
+END_YEAR = 2012
+
+
+
+experiment_name = "experiment_1"
+out_dir = "/media/stu231428/1120 7818/Master_github/datasets/plots/monthly_annual_seasonal/"
+cache_dir = "/media/stu231428/1120 7818/Master_github/datasets/cache"
 # -------------------------------------------------------------------------
 # Device setup
 # -------------------------------------------------------------------------
@@ -20,31 +26,11 @@ print(f"Using device: {device}")
 # -------------------------------------------------------------------------
 # Model definitions
 # -------------------------------------------------------------------------
-model_files = {
-    # "LSTM": (
-    #     "LSTMModel",
-    #     "/data/stu231428/Master_Thesis/main/trained_models/lsmt_with_pos.pt",
-    #     {"input_size": 14, "hidden_dim": 128, "dropout": 0, "num_layers": 3},
-    # ),
 
-    # "Attention LSTM": (
-    #     "LSTMModelAttentionTemporal",
-    #     "/data/stu231428/Master_Thesis/main/trained_models/attention_temporal_lstm_with_pos.pt",
-    #     {"input_size": 14, "hidden_dim": 256, "dropout": 0.4},
-    # ),
-    
-    # "MLP": (
-    #     "MLPModel",
-    #     "/data/stu231428/Master_Thesis/main/trained_models/mlp_with_pos.pt",
-    #     {"hidden_dims": [207, 248, 198], "input_dim": 44, "dropout": 0},
-    # ),
-}
 
-# XGBoost hinzufügen (Dummy-Eintrag für Konsistenz)
-xgb_model_path = "/data/stu231428/Master_Thesis/main/trained_models/xg_boost_with_pos_model.pkl"
-with open(xgb_model_path, "rb") as f:
-    xgb_model = pickle.load(f)
-model_files["XGBoost"] = ("xgboost", xgb_model, None)
+model_files = ["LSTM","Attention_LSTM","MLP","XGBoost"]
+
+
 
 # -------------------------------------------------------------------------
 # Helper: Daten laden und vorverarbeiten (mit Cache in Python, nicht Pickle)
@@ -59,7 +45,7 @@ def load_df_cache(ocean, model_name, cache_dict):
         return cache_dict[key]
     
     else:
-        base = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+        
 
         years = range(START_YEAR, END_YEAR + 1)
 
@@ -67,7 +53,7 @@ def load_df_cache(ocean, model_name, cache_dict):
         missing_years = []
 
         for year in years:
-            path = f"{base}/{model_name}_{ocean}_reconstruction_{year}_experiment_1.pkl"
+            path = f"{cache_dir}/{model_name}_{ocean}_reconstruction_{year}_{experiment_name}.pkl"
             if os.path.exists(path):
                 files.append(path)
             else:
@@ -78,7 +64,7 @@ def load_df_cache(ocean, model_name, cache_dict):
             raise FileNotFoundError(
                 f" Reconstruction files missing for years: {missing_years}\n"
                 f"Requested period: {START_YEAR}–{END_YEAR}\n"
-                f"Base path: {base}\n"
+                f"Base path: {cache_dir}\n"
                 f"Model: {model_name}"
             )
         dfs = [pd.read_pickle(fp) for fp in files]
@@ -141,7 +127,8 @@ df_cache_dict = {}
 # Main Loop: beide Figuren in einem Rutsch füllen
 # -------------------------------------------------------------------------
 for col_idx, ocean in enumerate(oceans):
-    for row_idx, (model_name, (ModelClass, model_path, model_kwargs)) in enumerate(model_files.items()):
+    #for row_idx, (model_name, (ModelClass, model_path, model_kwargs)) in enumerate(model_files.items()):
+    for row_idx, model_name in enumerate(model_files):
 
         df_cache = load_df_cache(ocean, model_name, df_cache_dict)
 
@@ -262,9 +249,9 @@ fig_yearly.legend(
 )
 fig_yearly.tight_layout(rect=[0, 0.05, 1, 1])
 
-out_dir = "/media/stu231428/1120 7818/Master_github/datasets/plots/monthly_annual_seasonal/"
+
 os.makedirs(out_dir, exist_ok=True)
-fig_yearly.savefig(os.path.join(out_dir, "experiment_5_annual_average_over_time.png"), dpi=150)
+fig_yearly.savefig(os.path.join(out_dir, f"{experiment_name}_annual_average_over_time.png"), dpi=150)
 plt.close(fig_yearly)
 
 # Saisonaler Plot
@@ -276,5 +263,5 @@ fig_seasonal.legend(
     fontsize=16,
 )
 fig_seasonal.tight_layout(rect=[0, 0.05, 1, 1])
-fig_seasonal.savefig(os.path.join(out_dir, "experiment_5_monthly_seasonal_cycle.png"), dpi=150)
+fig_seasonal.savefig(os.path.join(out_dir, f"{experiment_name}_monthly_seasonal_cycle.png"), dpi=150)
 plt.close(fig_seasonal)

@@ -1,11 +1,7 @@
 ## Data Preparation and Model Training
 
-### Experiment Configuration
-Note that the current implementation assumes **Experiment 1**.  
-If a different experiment is used, the corresponding settings must be updated
-directly in the respective scripts.
 
----
+
 
 ### Training and Validation Data
 

@@ -4,25 +4,28 @@ import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
 from collections import namedtuple
-
-from configs.attention_lstm_config import DATA_PATHS, HPARAMS
+from configs.data_paths import Stats_Data_Path
+from configs.attention_lstm_config import DATA_PATHS_Attention_LSTM, HPARAMS_Attention_LSTM
 from models.attention_lstm import LSTMModelAttentionTemporal
 
 Sample = namedtuple("Sample", ["features", "target", "meta"])
 
 
-START_YEAR = 2018
+#check the years to reconstruct
+START_YEAR = 2012
 END_YEAR = 2018
 
+region = "global"
+experiment = "experiment_1"
+#choose the test set path pattern
 TEST_PATH_PATTERN = (
     "/media/stu231428/1120 7818/Master_github/datasets/yearly/"
-    "North_Atlantic_test_{year}_experiment_1.pkl"
+    "{region}_test_{year}_{experiment}.pkl"
 )
 
+#choose output cache directory and pattern
 CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
-OUT_PATTERN = os.path.join(CACHE_DIR, "Attention_LSTM_Southern_Ocean_reconstruction_{year}_experiment_1.pkl")
-
-NORM_STATS_PATH = "/data/stu231428/Master_Thesis/Data/normalization_stats.pkl"
+OUT_PATTERN = os.path.join(CACHE_DIR, "Attention_LSTM_{region}_reconstruction_{year}_{experiment}.pkl")
 
 
 def collate_with_meta(batch):
@@ -47,7 +50,7 @@ class PointwiseSampleDatasetWithMeta(torch.utils.data.Dataset):
 
 
 def reconstruct_one_year(model, device, year, target_mean, target_std):
-    test_path = TEST_PATH_PATTERN.format(year=year)
+    test_path = TEST_PATH_PATTERN.format(year=year,region = region,experiment = experiment)
     if not os.path.exists(test_path):
         raise FileNotFoundError(f"Test set not found for year {year}: {test_path}")
 
@@ -88,7 +91,7 @@ def reconstruct_one_year(model, device, year, target_mean, target_std):
         .reset_index(drop=True)
     )
 
-    out_path = OUT_PATTERN.format(year=year)
+    out_path = OUT_PATTERN.format(year=year,region = region, experiment = experiment)
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     df.to_pickle(out_path)
 
@@ -107,17 +110,23 @@ def main():
 
     # load normalization stats
     #this should be the same as used during training
-    target_mean = 0.1847209
-    target_std = 1.3368018
+
+
+    training_stats_dir = pickle.load(open(Stats_Data_Path["training_stats"], "rb"))
+
+    target_mean = training_stats_dir["target_mean"]
+    target_std = training_stats_dir["target_stds"]
+    # target_mean = 0.1847209
+    # target_std = 1.3368018
 
     # load model once
     model = LSTMModelAttentionTemporal(
-        input_size=HPARAMS["input_size"],
-        hidden_dim=HPARAMS["hidden_dim"],
-        dropout=HPARAMS["dropout"],
+        input_size=HPARAMS_Attention_LSTM["input_size"],
+        hidden_dim=HPARAMS_Attention_LSTM["hidden_dim"],
+        dropout=HPARAMS_Attention_LSTM["dropout"],
     ).to(device)
 
-    model.load_state_dict(torch.load(DATA_PATHS["model_out"], map_location=device))
+    model.load_state_dict(torch.load(DATA_PATHS_Attention_LSTM["model_out"], map_location=device))
     model.eval()
 
     # run yearly

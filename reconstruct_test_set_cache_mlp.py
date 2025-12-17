@@ -6,22 +6,27 @@ from torch.utils.data import Dataset, DataLoader
 from collections import namedtuple
 import numpy as np
 
-from configs.mlp_config import DATA_PATHS, HPARAMS
+from configs.mlp_config import DATA_PATHS_MLP, HPARAMS_MLP
 from models.mlp import MLPModel
-
+from configs.data_paths import Stats_Data_Path
 Sample = namedtuple("Sample", ["features", "target", "meta"])
 
 
-CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+#check the years to reconstruct
+START_YEAR = 2012
+END_YEAR = 2018
 
+region = "global"
+experiment = "experiment_1"
+#choose the test set path pattern
 TEST_PATH_PATTERN = (
     "/media/stu231428/1120 7818/Master_github/datasets/yearly/"
-    "global_test_{year}_experiment_1.pkl"
+    "{region}_test_{year}_{experiment}.pkl"
 )
 
-# Zeitraum festlegen
-START_YEAR = 2018
-END_YEAR = 2018
+#choose output cache directory and pattern
+CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+OUT_PATTERN = os.path.join(CACHE_DIR, "MLP_{region}_reconstruction_{year}_{experiment}.pkl")
 
 
 def collate_with_meta(batch):
@@ -53,11 +58,11 @@ class PointwiseMLPDatasetWithMeta(Dataset):
 
 
 def reconstruct_one_year(model, device, target_mean, target_std, year):
-    test_path = TEST_PATH_PATTERN.format(year=year)
+    test_path = TEST_PATH_PATTERN.format(year=year,region = region, experiment = experiment)
     if not os.path.exists(test_path):
         raise FileNotFoundError(f"Test set not found for year {year}: {test_path}")
 
-    out_path = os.path.join(CACHE_DIR, f"MLP_global_reconstruction_{year}_experiment_1.pkl")
+    out_path =OUT_PATTERN.format(year = year, region = region, experiment = experiment)
 
     with open(test_path, "rb") as f:
         test_samples = pickle.load(f)
@@ -65,7 +70,7 @@ def reconstruct_one_year(model, device, target_mean, target_std, year):
     dataset = PointwiseMLPDatasetWithMeta(test_samples)
     loader = DataLoader(
         dataset,
-        batch_size=HPARAMS["batch_size"],
+        batch_size=2000,
         shuffle=False,
         collate_fn=collate_with_meta,
     )
@@ -118,18 +123,21 @@ def main():
     print("Range:", START_YEAR, "-", END_YEAR)
 
     os.makedirs(CACHE_DIR, exist_ok=True)
+    # training_stats_dir = pickle.load(open(Stats_Data_Path["training_stats"], "rb"))
 
+    # target_mean = training_stats_dir["target_mean"]
+    # target_std = training_stats_dir["target_stds"]
     # These should match training normalization
     target_mean = 0.1847209
     target_std = 1.3368018
 
     model = MLPModel(
-        input_dim=HPARAMS["input_dim"],
-        hidden_dims=HPARAMS["hidden_dims"],
-        dropout=HPARAMS["dropout"],
+        input_dim=HPARAMS_MLP["input_dim"],
+        hidden_dims=HPARAMS_MLP["hidden_dims"],
+        dropout=HPARAMS_MLP["dropout"],
     ).to(device)
 
-    model.load_state_dict(torch.load(DATA_PATHS["model_out"], map_location=device))
+    model.load_state_dict(torch.load(DATA_PATHS_MLP["model_out"], map_location=device))
     model.eval()
 
     for year in range(START_YEAR, END_YEAR + 1):

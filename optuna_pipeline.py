@@ -153,7 +153,7 @@ def objective_lstm(trial, train_dataset, val_dataset, device):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,num_workers=2)
 
-    model = LSTMModel(input_size=10, hidden_dim=hidden_dim, num_layers=num_layers, dropout=dropout).to(device)
+    model = LSTMModel(input_size=14, hidden_dim=hidden_dim, num_layers=num_layers, dropout=dropout).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
@@ -223,7 +223,7 @@ def objective_gru(trial, train_dataset, val_dataset, device):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,num_workers=2)
 
-    model = GRUModel(input_size=10, hidden_dim=hidden_dim, num_layers=num_layers, dropout=dropout).to(device)
+    model = GRUModel(input_size=14, hidden_dim=hidden_dim, num_layers=num_layers, dropout=dropout).to(device)
     criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 
@@ -282,7 +282,7 @@ def objective_lstm_attention(trial, train_dataset, val_dataset, device):
     batch_size = trial.suggest_categorical("batch_size", [32, 64, 128])
     # Initialize model with suggested hyperparams
     model = LSTMModelAttention(
-        input_size=10,   # Adjust input size as needed
+        input_size=14,   # Adjust input size as needed
         hidden_dim=hidden_dim,
             # You can optimize this too if you want
         dropout=dropout
@@ -347,7 +347,7 @@ def objective_lstm_attention_temporal(trial, train_dataset, val_dataset, device)
     batch_size = trial.suggest_categorical("batch_size", [32, 64, 128])
     # Initialize model with suggested hyperparams
     model = LSTMModelAttentionTemporal(
-        input_size=10,   # Adjust input size as needed
+        input_size=14,   # Adjust input size as needed
         hidden_dim=hidden_dim,
             # You can optimize this too if you want
         dropout=dropout
@@ -414,7 +414,7 @@ def objective_lstm_2layerattention(trial, train_dataset, val_dataset, device):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,num_workers=2)
     # Initialize model with suggested hyperparams
     model = LSTMModelAttention2Layer(
-        input_size=10,   # Adjust input size as needed
+        input_size=14,   # Adjust input size as needed
         hidden_dim_1 =hidden_dim_1,
         hidden_dim_2 = hidden_dim_2,
         num_layers = num_layers,
@@ -667,10 +667,18 @@ del val_dataset
 del train_dataset_mlp
 del val_dataset_mlp
 
-X_train = np.array([s.features.flatten() for s in train_samples])
+
+def flatten_sample(sample, n_dyn=10, n_static=4, window_size=4):
+    x = sample.features  # shape: (4, 14)
+    x_dyn = x[:, :n_dyn].flatten()   # 4×10 = 40
+    x_static = x[0, n_dyn:]          # 4 static features
+    return np.concatenate([x_dyn, x_static])
+X_train = np.array([flatten_sample(s) for s in train_samples])
 y_train = np.array([s.target for s in train_samples]).reshape(-1, 1)
-X_val = np.array([s.features.flatten() for s in val_samples])
+
+X_val = np.array([flatten_sample(s) for s in val_samples])
 y_val = np.array([s.target for s in val_samples]).reshape(-1, 1)
+
 
 
 study_xgb = optuna.create_study(

@@ -9,6 +9,7 @@ import gc
 import random
 from models.attention_lstm import LSTMModelAttentionTemporalWithWeights
 from collections import namedtuple
+from configs.attention_lstm_config import HPARAMS_Attention_LSTM, DATA_PATHS_Attention_LSTM
 
 # -------------------------------------------------------------------------
 # Reproducibility
@@ -89,15 +90,16 @@ def load_samples_by_month(pkl_path, months, window_size=None, input_size=None):
 # -------------------------------------------------------------------------
 # Load trained attention-based LSTM model
 # -------------------------------------------------------------------------
+
 lstm_model_attention_temporal = LSTMModelAttentionTemporalWithWeights(
-    input_size=14,      # 10 dynamic + 4 additional (e.g. positional / static features)
-    hidden_dim=256,
-    dropout=0.4
+    input_size=HPARAMS_Attention_LSTM["input_size"],
+    hidden_dim=HPARAMS_Attention_LSTM["hidden_dim"],
+    dropout=HPARAMS_Attention_LSTM["dropout"],
 ).to(device)
 
 lstm_model_attention_temporal.load_state_dict(
     torch.load(
-        "/data/stu231428/Master_Thesis/main/trained_models/attention_temporal_lstm_with_pos.pt",
+        DATA_PATHS_Attention_LSTM["model_out"],
         map_location=device
     )
 )
@@ -123,9 +125,9 @@ month_map = {
 
 # Paths to yearly test datasets
 data_paths = [
-    ("/media/stu231428/1120 7818/Master_github/datasets/yearly/North_Atlantic_test_2018_experiment_1.pkl",
+    ("/media/stu231428/1120 7818/Master_github/datasets/yearly/global_test_2018_experiment_1.pkl",
      "North_Atlantic"),
-    ("/media/stu231428/1120 7818/Master_github/datasets/yearly/Southern_Ocean_test_2018_experiment_1.pkl",
+    ("/media/stu231428/1120 7818/Master_github/datasets/yearly/global_test_2018_experiment_1.pkl",
      "Southern_Ocean"),
 ]
 
