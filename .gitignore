@@ -1,3 +1,3 @@
-data/
-trained_models/
+data/*/*/*.*
+trained_models/*.*
 venv/
