@@ -1,4 +1,4 @@
-DATA_PATHS = {
+DATA_PATHS_MLP = {
     "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
     "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
     "model_out":     "/media/stu231428/1120 7818/Master_github/datasets/trained_models/mlp.pt",
@@ -6,7 +6,7 @@ DATA_PATHS = {
     "plot_out":      "/media/stu231428/1120 7818/Master_github/datasets/training_plots/mlp_training_plot.png",
 }
 
-HPARAMS = {
+HPARAMS_MLP = {
     "input_dim": 44,
     "hidden_dims": [207,248,198],
     

@@ -1,16 +1,16 @@
 # xgboost_config.py
 
 # ========== Datenpfade ====================
-DATA_PATHS = {
+DATA_PATHS_XGBoost = {
     "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
     "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
-    "model_out":     "/media/stu231428/1120 7818/Master_github/datasets/trained_models/xgboost_model.bin",
+    "model_out":     "/data/stu231428/Master_Thesis/main/trained_models/xg_boost_with_pos_model.pkl",
     "losses_out":    "/media/stu231428/1120 7818/Master_github/datasets/training_plots/xgboost_losses.pkl",
     "plot_out":      "/media/stu231428/1120 7818/Master_github/datasets/training_plots/xgboost_training_plot.png",
 }
 
 # ========== Hyperparameter für XGBoost ====================
-HPARAMS = {
+HPARAMS_XGBoost = {
     "booster": "dart",  # Typ des Boosters (DART: Dropout)
     "n_estimators": 400,  # Anzahl der Bäume
     "max_depth": 14,  # Maximale Tiefe der Bäume
