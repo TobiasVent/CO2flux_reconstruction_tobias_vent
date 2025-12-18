@@ -112,7 +112,7 @@ def main():
     #this should be the same as used during training
 
 
-    training_stats_dir = pickle.load(open(Stats_Data_Path["training_stats"], "rb"))
+    training_stats_dir = pickle.load(open("data/training_set/training_stats.pkl", "rb"))
 
     target_mean = training_stats_dir["target_mean"]
     target_std = training_stats_dir["target_stds"]

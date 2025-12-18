@@ -18,10 +18,10 @@ Sample = namedtuple("Sample", ["features", "target", "meta"])
 
 def main():
     # ================= Load data =================
-    with open(DATA_PATHS_Attention_LSTM["train_samples"], "rb") as f:
+    with open("/data/training_set/training_set.pkl", "rb") as f:
         train_samples = pickle.load(f)
 
-    with open(DATA_PATHS_Attention_LSTM["val_samples"], "rb") as f:
+    with open("/data/training_set/validation_set.pkl", "rb") as f:
         val_samples = pickle.load(f)
 
     # Select device (GPU if available, otherwise CPU)
