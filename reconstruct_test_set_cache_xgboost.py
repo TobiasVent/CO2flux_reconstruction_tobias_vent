@@ -20,13 +20,13 @@ experiment = "experiment_1"
 
 # Test set path pattern (per year)
 TEST_PATH_PATTERN = (
-    "/media/stu231428/1120 7818/Master_github/datasets/yearly/"
+    "data/test_sest/{experiment}/{region}"
     "{region}_test_{year}_{experiment}.pkl"
 )
 
-# Output cache directory and filename pattern (per year)
-CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
-OUT_PATTERN = os.path.join(CACHE_DIR, "XGBoost_{region}_reconstruction_{year}_{experiment}.pkl")
+#choose output cache directory and pattern
+CACHE_DIR = f"/data/reconstruction_cache/{experiment}/{region}"
+OUT_PATTERN = os.path.join(CACHE_DIR, "Attention_LSTM_{region}_reconstruction_{year}_{experiment}.pkl")
 
 
 def flatten_dyn_plus_static(x_window, n_dyn=10):

@@ -16,7 +16,7 @@ END_YEAR = 2012
 
 experiment_name = "experiment_1"
 out_dir = "/media/stu231428/1120 7818/Master_github/datasets/plots/monthly_annual_seasonal/"
-cache_dir = "/media/stu231428/1120 7818/Master_github/datasets/cache"
+
 # -------------------------------------------------------------------------
 # Device setup
 # -------------------------------------------------------------------------
@@ -51,7 +51,7 @@ def load_df_cache(ocean, model_name, cache_dict):
 
         files = []
         missing_years = []
-
+        cache_dir = f"data/reconstruction_cache/{experiment_name}/{ocean}"
         for year in years:
             path = f"{cache_dir}/{model_name}_{ocean}_reconstruction_{year}_{experiment_name}.pkl"
             if os.path.exists(path):

@@ -22,13 +22,13 @@ region = "global"
 experiment = "experiment_1"
 #choose the test set path pattern
 TEST_PATH_PATTERN = (
-    "/media/stu231428/1120 7818/Master_github/datasets/yearly/"
+    "data/test_sest/{experiment}/{region}"
     "{region}_test_{year}_{experiment}.pkl"
 )
 
 #choose output cache directory and pattern
-CACHE_DIR = "/media/stu231428/1120 7818/Master_github/datasets/cache"
-OUT_PATTERN = os.path.join(CACHE_DIR, "LSTM_{region}_reconstruction_{year}_{experiment}.pkl")
+CACHE_DIR = f"/data/reconstruction_cache/{experiment}/{region}"
+OUT_PATTERN = os.path.join(CACHE_DIR, "Attention_LSTM_{region}_reconstruction_{year}_{experiment}.pkl")
 
 
 
