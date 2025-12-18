@@ -15,7 +15,7 @@ END_YEAR = 2012
 
 
 experiment_name = "experiment_1"
-out_dir = "/media/stu231428/1120 7818/Master_github/datasets/plots/monthly_annual_seasonal/"
+out_dir = "/data/results/annual_seasonal_plots/"
 
 # -------------------------------------------------------------------------
 # Device setup
