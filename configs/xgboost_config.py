@@ -2,11 +2,11 @@
 
 # ========== Datenpfade ====================
 DATA_PATHS_XGBoost = {
-    "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
-    "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
-    "model_out":     "/data/stu231428/Master_Thesis/main/trained_models/xg_boost_with_pos_model.pkl",
-    "losses_out":    "/media/stu231428/1120 7818/Master_github/datasets/training_plots/xgboost_losses.pkl",
-    "plot_out":      "/media/stu231428/1120 7818/Master_github/datasets/training_plots/xgboost_training_plot.png",
+    # "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
+    # "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
+    "model_out":     "trained_models/xg_boost_with_pos_model.pkl",
+    "losses_out":    "/trained_models/train_plots/xgboost_losses.pkl",
+    "plot_out":      "/trained_models/train_plots/xgboost_training_plot.png",
 }
 
 # ========== Hyperparameter für XGBoost ====================

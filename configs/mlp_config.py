@@ -1,9 +1,9 @@
 DATA_PATHS_MLP = {
     "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
     "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
-    "model_out":     "/media/stu231428/1120 7818/Master_github/datasets/trained_models/mlp.pt",
-    "losses_out":    "/media/stu231428/1120 7818/Master_github/datasets/training_plots/mlp_losses.pkl",
-    "plot_out":      "/media/stu231428/1120 7818/Master_github/datasets/training_plots/mlp_training_plot.png",
+    "model_out":     "trained_models/trained_models/mlp.pt",
+    "losses_out":    "trained_models/train_plots/training_plots/mlp_losses.pkl",
+    "plot_out":      "trained_models/train_plots/training_plots/mlp_training_plot.png",
 }
 
 HPARAMS_MLP = {

@@ -1,9 +1,9 @@
 DATA_PATHS_LSTM = {
-    "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
-    "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
-    "model_out":     "/data/stu231428/Master_Thesis/main/trained_models/lsmt_with_pos.pt",
-    "losses_out":    "/media/stu231428/1120 7818/Master_github/datasets/training_plots/lstm_losses.pkl",
-    "plot_out":      "/media/stu231428/1120 7818/Master_github/datasets/training_plots/lstm_training_plot.png",
+    # "train_samples": "/media/stu231428/1120 7818/Master_github/datasets/training_set.pkl",
+    # "val_samples":   "/media/stu231428/1120 7818/Master_github/datasets/validation_set.pkl",
+    "model_out":     "/trained_models/lsmt_with_pos.pt",
+    "losses_out":    "/trained_models/train_plots/lstm_losses.pkl",
+    "plot_out":      "/trained_models/train_plots/lstm_training_plot.png",
 }
 
 HPARAMS_LSTM = {
