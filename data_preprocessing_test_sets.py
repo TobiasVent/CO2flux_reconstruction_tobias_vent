@@ -76,9 +76,9 @@ def preprocess_yearwise(
 
     for y in [year - 1, year]:
         if experiment_name == "experiment_1":
-            file_path = f"/media/stu231428/1120 7818/Ocean Carbon/1/ORCA025.L46.LIM2vp.CFCSF6.MOPS.JRA.LP04-KLP002.hind_{y}_df.pkl"
-        if experiment_name == "experiment_2":
-            file_path = f"/media/stu231428/1120 7818/exp_5/ORCA025.L46.LIM2vp.CFCSF6.MOPS.JRA.LP04-KLP002.wind_{y}_df.pkl"
+            file_path = f"/data/experiment_data/experiment_1/1/ORCA025.L46.LIM2vp.CFCSF6.MOPS.JRA.LP04-KLP002.hind_{y}_df.pkl"
+        if experiment_name == "experiment_5":
+            file_path = f"/data/experiment_data/experiment_5/ORCA025.L46.LIM2vp.CFCSF6.MOPS.JRA.LP04-KLP002.wind_{y}_df.pkl"
 
         print(f"Loading {y}")
         df = pd.read_pickle(file_path)
@@ -138,7 +138,7 @@ def preprocess_yearwise(
     # -------------------------------------------------
     # 4) Global normalization (must come from training!)
     # -------------------------------------------------
-    training_stats_dir = pickle.load(open(Stats_Data_Path["training_stats"], "rb"))
+    training_stats_dir = pickle.load(open("/data/training_set/training_stats.pkl", "rb"))
     feature_means = training_stats_dir["feature_mean"]
     feature_stds = training_stats_dir["feature_stds"]
     target_mean = training_stats_dir["target_mean"]
@@ -194,7 +194,7 @@ def preprocess_yearwise(
 experiment_name = "experiment_1"
 YEARS = range(2009, 2018)
 REGION = "global"
-out_dir = ""
+out_dir = f"/data/test_sest/{experiment_name}/{REGION}"
 
 # -------------------------------------------------
 # Run preprocessing year by year
